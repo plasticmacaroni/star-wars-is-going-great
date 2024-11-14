@@ -4,12 +4,20 @@ body {
     margin: 0;
     background-color: #000;
     color: #fff;
+    background-image: radial-gradient(circle at 10% 20%, rgba(255, 255, 255, 0.2) 2px, transparent 0),
+        radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.15) 1.5px, transparent 0),
+        radial-gradient(circle at 70% 30%, rgba(255, 255, 255, 0.1) 1px, transparent 0),
+        radial-gradient(circle at 90% 70%, rgba(255, 255, 255, 0.25) 2.5px, transparent 0);
+    background-size: 800px 800px;
+    background-repeat: repeat;
+    overflow-x: hidden;
 }
 
+/* Header Section */
 header {
     text-align: center;
     padding: 50px 0;
-    background-color: #1a1a1a;
+    background-color: rgba(26, 26, 26, 0.9);
 }
 
 h1 {
@@ -21,6 +29,7 @@ p {
     font-size: 1.2em;
 }
 
+/* Main Content */
 main {
     position: relative;
     max-width: 1200px;
@@ -46,6 +55,7 @@ main::before {
     position: relative;
     padding: 20px;
     box-sizing: border-box;
+    transition: background-color 0.3s ease;
 }
 
 .timeline-item.left {
@@ -56,12 +66,60 @@ main::before {
     left: 50%;
 }
 
-/* Timeline content */
+/* Cancelled Timeline Item */
+.timeline-item.cancelled .timeline-content {
+    background-color: rgba(255, 0, 0, 0.1);
+    /* Light red tint */
+    border: 1px solid rgba(255, 0, 0, 0.3);
+    /* Optional: Add a subtle red border */
+}
+
+/* Timeline Content */
 .timeline-item .timeline-content {
-    background-color: #1a1a1a;
+    position: relative;
     padding: 20px;
     border-radius: 6px;
+    background-color: transparent;
+    /* Remove solid background to show image */
+    background-size: cover;
+    /* Ensures the image covers the container */
+    background-position: center center;
+    /* Centers the image */
+    background-repeat: no-repeat;
+    /* Prevents tiling */
+    overflow: hidden;
+    min-height: 300px;
+    /* Adjust as needed */
+}
+
+.timeline-item .timeline-content::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    /* Adjust the gradient as needed */
+    background: linear-gradient(to bottom, rgba(26, 26, 26, 0.6), rgba(26, 26, 26, 0.9));
+    z-index: 1;
+}
+
+/* Add black haze around text elements */
+.timeline-item .timeline-content h2,
+.timeline-item .timeline-content p,
+.timeline-item .timeline-content .scores-container {
     position: relative;
+    z-index: 2;
+    background-color: rgba(0, 0, 0, 0.6);
+    /* Semi-transparent black background */
+    padding: 10px;
+    border-radius: 4px;
+    margin-bottom: 10px;
+}
+
+/* Adjust margins for the last paragraph */
+.timeline-item .timeline-content p:last-child {
+    margin-bottom: 0;
 }
 
 .timeline-item.left .timeline-content {
@@ -86,7 +144,7 @@ main::before {
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 1;
+    z-index: 3;
 }
 
 .timeline-item.left .status-icon {
@@ -97,16 +155,42 @@ main::before {
     left: -20px;
 }
 
-/* Status Icon Font Awesome Styles */
+/* Default Icon Style */
 .status-icon i {
-    color: #fff;
     font-size: 20px;
 }
 
-.timeline-content img {
-    width: 100%;
-    height: auto;
-    margin-bottom: 15px;
+/* Status-Based Icon Colors */
+.status-icon .status-released {
+    color: green;
+}
+
+.status-icon .status-unreleased {
+    color: lightgray;
+}
+
+.status-icon .status-partially-completed {
+    color: orange;
+}
+
+.status-icon .status-canceled {
+    color: red;
+}
+
+.status-icon .status-uncertain {
+    color: yellow;
+}
+
+.status-icon .status-in-production {
+    color: blue;
+}
+
+.status-icon .status-in-development {
+    color: purple;
+}
+
+.status-icon .status-unknown {
+    color: white;
 }
 
 /* Scores Container */
@@ -128,29 +212,24 @@ main::before {
 /* General Score Box Styles */
 .score-box {
     position: relative;
-    width: 150px;
-    height: 80px;
     margin: 10px;
     padding: 10px;
     color: #fff;
-    background-color: rgba(26, 26, 26, 0.8);
     border-radius: 8px;
     display: flex;
     align-items: center;
-    justify-content: center;
     text-decoration: none;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-blend-mode: multiply;
 }
 
-.score-box .score-icon {
-    max-width: 40px;
-    max-height: 40px;
-    margin-right: 10px;
-    object-fit: cover;
-}
-
+/* Score Text */
 .score-box span {
-    font-size: 1.5em;
+    font-size: 1.2em;
     font-weight: bold;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
 }
 
 /* Fallback for missing images */
@@ -176,5 +255,9 @@ img:not([src]) {
     .status-icon {
         left: 20px;
         right: auto;
+    }
+
+    main::before {
+        left: 20px;
     }
 }

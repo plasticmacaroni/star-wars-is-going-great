@@ -32,7 +32,11 @@ function renderTimeline(entries) {
     timeline.innerHTML = ''; // Clear existing content
 
     // Sort entries by date descending
-    entries.sort((a, b) => new Date(b.date) - new Date(a.date));
+    entries.sort((a, b) => {
+        const dateA = new Date(a.date);
+        const dateB = new Date(b.date);
+        return dateB - dateA;
+    });
 
     let isLeft = true; // Flag to alternate sides
 
@@ -49,12 +53,11 @@ function renderTimeline(entries) {
         const content = document.createElement('div');
         content.classList.add('timeline-content');
 
-        // Add background image
+        // Set background image if it exists
         if (entry.image) {
-            const img = document.createElement('img');
-            img.src = entry.image;
-            img.alt = entry.title || 'Image';
-            content.appendChild(img);
+            content.style.backgroundImage = `url(${entry.image})`;
+        } else {
+            content.style.backgroundImage = 'none';
         }
 
         // Add title
@@ -65,9 +68,10 @@ function renderTimeline(entries) {
         }
 
         // Add date and media type
-        if (entry.date && entry.media_type) {
+        if (entry.media_type) {
+            const dateToDisplay = entry.display_date || entry.date || 'Date Unknown';
             const dateMedia = document.createElement('p');
-            dateMedia.textContent = `${entry.date} | ${entry.media_type}`;
+            dateMedia.textContent = `${dateToDisplay} | ${entry.media_type}`;
             content.appendChild(dateMedia);
         }
 
@@ -103,23 +107,34 @@ function renderTimeline(entries) {
                 // Add classes
                 scoreElement.classList.add('score-box');
 
-                // Generate a class-friendly version of the score type
-                const scoreTypeClass = score.type.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9\-]/g, '');
-                scoreElement.classList.add(scoreTypeClass);
+                // Generate a class-friendly version of the site and type
+                const siteClass = score.site.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9\-]/g, '');
+                const typeClass = score.type.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9\-]/g, '');
+                scoreElement.classList.add(siteClass, typeClass);
 
-                // Add the icon image if it exists
-                const iconPath = getIconPath(score.type);
-                const iconImg = document.createElement('img');
-                iconImg.src = iconPath;
-                iconImg.alt = ''; // Prevent text from showing if image doesn't load
-                iconImg.classList.add('score-icon');
+                // Parse the score value and maximum score
+                const { scoreValue, maxScore } = parseScore(score.score);
 
-                // Hide the image if it fails to load
-                iconImg.onerror = function () {
-                    this.style.display = 'none';
-                };
+                // Determine background color based on score
+                const backgroundColor = getScoreColor(scoreValue, maxScore);
+                scoreElement.style.backgroundColor = backgroundColor;
 
-                scoreElement.appendChild(iconImg);
+                // Try to set the icon as background image
+                const iconPath = getIconPath(score.site);
+                checkImageExists(iconPath, exists => {
+                    if (exists) {
+                        // Set the icon as background image
+                        scoreElement.style.backgroundImage = `url(${iconPath})`;
+                        scoreElement.style.backgroundSize = 'contain';
+                        scoreElement.style.backgroundRepeat = 'no-repeat';
+                        scoreElement.style.backgroundPosition = 'center';
+                        // Apply blend mode to colorize the icon
+                        scoreElement.style.backgroundBlendMode = 'multiply';
+                    } else {
+                        // No icon found, background color will suffice
+                        scoreElement.style.backgroundImage = 'none';
+                    }
+                });
 
                 // Add score value
                 const scoreSpan = document.createElement('span');
@@ -148,34 +163,92 @@ function renderTimeline(entries) {
     });
 }
 
-// Function to get the icon path for a given score type
-function getIconPath(scoreType) {
-    // Create a filename-friendly version of the score type
-    const fileName = scoreType.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9\-_]/g, '');
+// Function to parse score value and determine max score
+function parseScore(scoreStr) {
+    let scoreValue = parseFloat(scoreStr.replace(/[^0-9.]/g, ''));
+    let maxScore = 10; // Default max score
 
-    // We'll assume the file exists with a .png extension
-    // The image's onerror event will handle missing files
-    return `icons/${fileName}.png`;
+    if (scoreStr.includes('%')) {
+        maxScore = 100;
+    } else if (scoreStr.includes('/10')) {
+        maxScore = 10;
+    } else if (scoreStr.includes('/5')) {
+        maxScore = 5;
+    } else if (scoreValue > 10) {
+        // Assuming scores above 10 have a max of 100
+        maxScore = 100;
+    }
+
+    return { scoreValue, maxScore };
+}
+
+// Function to get the color based on the score (0-1 scale)
+function getScoreColor(scoreValue, maxScore) {
+    // Normalize score to a 0-1 scale
+    const normalizedScore = scoreValue / maxScore;
+
+    // Map normalized score to a hue value (red to green)
+    const hue = normalizedScore * 80; // 0 (red) to 120 (green)
+    return `hsl(${hue}, 70%, 50%)`;
+}
+
+// Function to get the icon path for a given site
+function getIconPath(site) {
+    const siteName = site.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9\-_]/g, '');
+    return `icons/${siteName}.png`;
+}
+
+// Function to check if an image exists at a given URL
+function checkImageExists(url, callback) {
+    const img = new Image();
+    img.onload = function () {
+        callback(true);
+    };
+    img.onerror = function () {
+        callback(false);
+    };
+    img.src = url;
 }
 
 // Function to get the HTML for the status icon
 function getStatusIconHTML(status) {
     let iconClass = '';
+    let statusClass = ''; // New variable to hold the status-based class
     switch (status.toLowerCase()) {
         case 'released':
+        case 'occurred':
             iconClass = 'fa-solid fa-circle-check'; // Checkmark icon
+            statusClass = 'status-released';
             break;
         case 'unreleased':
             iconClass = 'fa-solid fa-circle'; // Circle icon
+            statusClass = 'status-unreleased';
             break;
         case 'partially completed':
             iconClass = 'fa-solid fa-exclamation-circle'; // Exclamation icon
+            statusClass = 'status-partially-completed';
             break;
-        case 'cancelled':
+        case 'canceled':
+        case 'allegedly canceled by disney':
             iconClass = 'fa-solid fa-circle-xmark'; // Cross icon
+            statusClass = 'status-canceled';
+            break;
+        case 'uncertain':
+            iconClass = 'fa-solid fa-question-circle'; // Question mark icon
+            statusClass = 'status-uncertain';
+            break;
+        case 'in production':
+            iconClass = 'fa-solid fa-film'; // Film icon
+            statusClass = 'status-in-production';
+            break;
+        case 'in development':
+            iconClass = 'fa-solid fa-hammer'; // Hammer icon
+            statusClass = 'status-in-development';
             break;
         default:
-            iconClass = 'fa-solid fa-question-circle'; // Question mark for unknown status
+            iconClass = 'fa-solid fa-question-circle'; // Default to question mark
+            statusClass = 'status-unknown';
     }
-    return `<i class="${iconClass}"></i>`;
+    // Include the status-based class in the <i> element
+    return `<i class="${iconClass} ${statusClass}"></i>`;
 }
