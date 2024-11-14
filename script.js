@@ -49,6 +49,11 @@ function renderTimeline(entries) {
         item.classList.add(isLeft ? 'left' : 'right');
         isLeft = !isLeft;
 
+        // Check if the status indicates cancellation
+        if (isCancelled(entry.status)) {
+            item.classList.add('cancelled');
+        }
+
         // Create content container
         const content = document.createElement('div');
         content.classList.add('timeline-content');
@@ -91,60 +96,58 @@ function renderTimeline(entries) {
 
         // Add scores
         if (entry.scores && Array.isArray(entry.scores)) {
-            const scoresContainer = document.createElement('div');
-            scoresContainer.classList.add('scores-container');
+            // Separate scores into Critics and Users
+            const criticScores = [];
+            const userScores = [];
 
             entry.scores.forEach(score => {
-                let scoreElement;
-                if (score.source) {
-                    scoreElement = document.createElement('a');
-                    scoreElement.href = score.source;
-                    scoreElement.target = '_blank';
-                } else {
-                    scoreElement = document.createElement('div');
+                const typeLower = score.type.toLowerCase();
+                if (typeLower.includes('critic') || typeLower.includes('metascore')) {
+                    criticScores.push(score);
+                } else if (typeLower.includes('user') || typeLower.includes('audience')) {
+                    userScores.push(score);
                 }
-
-                // Add classes
-                scoreElement.classList.add('score-box');
-
-                // Generate a class-friendly version of the site and type
-                const siteClass = score.site.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9\-]/g, '');
-                const typeClass = score.type.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9\-]/g, '');
-                scoreElement.classList.add(siteClass, typeClass);
-
-                // Parse the score value and maximum score
-                const { scoreValue, maxScore } = parseScore(score.score);
-
-                // Determine background color based on score
-                const backgroundColor = getScoreColor(scoreValue, maxScore);
-                scoreElement.style.backgroundColor = backgroundColor;
-
-                // Try to set the icon as background image
-                const iconPath = getIconPath(score.site);
-                checkImageExists(iconPath, exists => {
-                    if (exists) {
-                        // Set the icon as background image
-                        scoreElement.style.backgroundImage = `url(${iconPath})`;
-                        scoreElement.style.backgroundSize = 'contain';
-                        scoreElement.style.backgroundRepeat = 'no-repeat';
-                        scoreElement.style.backgroundPosition = 'center';
-                        // Apply blend mode to colorize the icon
-                        scoreElement.style.backgroundBlendMode = 'multiply';
-                    } else {
-                        // No icon found, background color will suffice
-                        scoreElement.style.backgroundImage = 'none';
-                    }
-                });
-
-                // Add score value
-                const scoreSpan = document.createElement('span');
-                scoreSpan.textContent = score.score || '';
-                scoreElement.appendChild(scoreSpan);
-
-                scoresContainer.appendChild(scoreElement);
             });
 
-            content.appendChild(scoresContainer);
+            // Create Critic Scores Container with Label
+            if (criticScores.length > 0) {
+                const criticScoresContainer = document.createElement('div');
+                criticScoresContainer.classList.add('scores-container', 'critic-scores');
+
+                // Create and append the label inside the container
+                const criticLabel = document.createElement('h3');
+                criticLabel.textContent = 'Critic Scores';
+                criticLabel.classList.add('scores-label');
+                criticScoresContainer.appendChild(criticLabel);
+
+                // Append each critic score
+                criticScores.forEach(score => {
+                    const scoreElement = createScoreElement(score);
+                    criticScoresContainer.appendChild(scoreElement);
+                });
+
+                content.appendChild(criticScoresContainer);
+            }
+
+            // Create User Scores Container with Label
+            if (userScores.length > 0) {
+                const userScoresContainer = document.createElement('div');
+                userScoresContainer.classList.add('scores-container', 'user-scores');
+
+                // Create and append the label inside the container
+                const userLabel = document.createElement('h3');
+                userLabel.textContent = 'User Scores';
+                userLabel.classList.add('scores-label');
+                userScoresContainer.appendChild(userLabel);
+
+                // Append each user score
+                userScores.forEach(score => {
+                    const scoreElement = createScoreElement(score);
+                    userScoresContainer.appendChild(scoreElement);
+                });
+
+                content.appendChild(userScoresContainer);
+            }
         }
 
         // Append content to item
@@ -161,6 +164,63 @@ function renderTimeline(entries) {
         // Append item to timeline
         timeline.appendChild(item);
     });
+}
+
+// Function to create a score element
+function createScoreElement(score) {
+    let scoreElement;
+    if (score.source) {
+        scoreElement = document.createElement('a');
+        scoreElement.href = score.source;
+        scoreElement.target = '_blank';
+    } else {
+        scoreElement = document.createElement('div');
+    }
+
+    // Add classes
+    scoreElement.classList.add('score-box');
+
+    // Generate a class-friendly version of the site and type
+    const siteClass = score.site.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9\-]/g, '');
+    const typeClass = score.type.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9\-]/g, '');
+    scoreElement.classList.add(siteClass, typeClass);
+
+    // Parse the score value and maximum score
+    const { scoreValue, maxScore } = parseScore(score.score);
+
+    // Determine background color based on score
+    const backgroundColor = getScoreColor(scoreValue, maxScore);
+    scoreElement.style.backgroundColor = backgroundColor;
+
+    // Try to set the icon as background image
+    const iconPath = getIconPath(score.site);
+    checkImageExists(iconPath, exists => {
+        if (exists) {
+            // Set the icon as background image
+            scoreElement.style.backgroundImage = `url(${iconPath})`;
+            scoreElement.style.backgroundSize = 'contain';
+            scoreElement.style.backgroundRepeat = 'no-repeat';
+            scoreElement.style.backgroundPosition = 'center';
+            // Apply blend mode to colorize the icon
+            scoreElement.style.backgroundBlendMode = 'multiply';
+        } else {
+            // No icon found, background color will suffice
+            scoreElement.style.backgroundImage = 'none';
+        }
+    });
+
+    // Add score value
+    const scoreSpan = document.createElement('span');
+    scoreSpan.textContent = score.score || '';
+    scoreElement.appendChild(scoreSpan);
+
+    return scoreElement;
+}
+
+// Function to check if the status indicates cancellation
+function isCancelled(status) {
+    const cancelledKeywords = ['cancelled', 'canceled', 'halted', 'terminated'];
+    return cancelledKeywords.some(keyword => status.toLowerCase().includes(keyword));
 }
 
 // Function to parse score value and determine max score
@@ -188,7 +248,7 @@ function getScoreColor(scoreValue, maxScore) {
     const normalizedScore = scoreValue / maxScore;
 
     // Map normalized score to a hue value (red to green)
-    const hue = normalizedScore * 80; // 0 (red) to 120 (green)
+    const hue = normalizedScore * 85;
     return `hsl(${hue}, 70%, 50%)`;
 }
 
@@ -228,10 +288,13 @@ function getStatusIconHTML(status) {
             iconClass = 'fa-solid fa-exclamation-circle'; // Exclamation icon
             statusClass = 'status-partially-completed';
             break;
+        case 'cancelled':
         case 'canceled':
+        case 'allegedly cancelled by disney':
         case 'allegedly canceled by disney':
+        case 'cancelled after season 1':
             iconClass = 'fa-solid fa-circle-xmark'; // Cross icon
-            statusClass = 'status-canceled';
+            statusClass = 'status-cancelled';
             break;
         case 'uncertain':
             iconClass = 'fa-solid fa-question-circle'; // Question mark icon
@@ -244,6 +307,10 @@ function getStatusIconHTML(status) {
         case 'in development':
             iconClass = 'fa-solid fa-hammer'; // Hammer icon
             statusClass = 'status-in-development';
+            break;
+        case 'upcoming release':
+            iconClass = 'fa-solid fa-star'; // Star icon
+            statusClass = 'status-upcoming-release';
             break;
         default:
             iconClass = 'fa-solid fa-question-circle'; // Default to question mark

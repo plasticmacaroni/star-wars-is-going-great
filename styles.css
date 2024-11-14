@@ -107,7 +107,8 @@ main::before {
 /* Add black haze around text elements */
 .timeline-item .timeline-content h2,
 .timeline-item .timeline-content p,
-.timeline-item .timeline-content .scores-container {
+.timeline-item .timeline-content .scores-container,
+.timeline-item .timeline-content .scores-label {
     position: relative;
     z-index: 2;
     background-color: rgba(0, 0, 0, 0.6);
@@ -115,6 +116,23 @@ main::before {
     padding: 10px;
     border-radius: 4px;
     margin-bottom: 10px;
+}
+
+/* Style for Score Section Labels */
+.timeline-item .timeline-content .scores-label {
+    font-size: 1.4em;
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+/* Style for Critic and User Scores Containers */
+.timeline-item .timeline-content .critic-scores,
+.timeline-item .timeline-content .user-scores {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    /* Adds consistent spacing between score boxes */
 }
 
 /* Adjust margins for the last paragraph */
@@ -173,7 +191,7 @@ main::before {
     color: orange;
 }
 
-.status-icon .status-canceled {
+.status-icon .status-cancelled {
     color: red;
 }
 
@@ -189,6 +207,10 @@ main::before {
     color: purple;
 }
 
+.status-icon .status-upcoming-release {
+    color: gold;
+}
+
 .status-icon .status-unknown {
     color: white;
 }
@@ -199,21 +221,24 @@ main::before {
     flex-wrap: wrap;
     margin-top: 15px;
     justify-content: center;
+    gap: 10px;
+    /* Adds consistent spacing between score boxes */
 }
 
-.timeline-item.left .scores-container {
-    justify-content: flex-end;
+/* Critic and User Scores have their own classes */
+.critic-scores {
+    /* Additional styles for Critic Scores if needed */
 }
 
-.timeline-item.right .scores-container {
-    justify-content: flex-start;
+.user-scores {
+    /* Additional styles for User Scores if needed */
 }
 
 /* General Score Box Styles */
 .score-box {
     position: relative;
-    margin: 10px;
-    padding: 10px;
+    margin: 5px;
+    padding: 10px 15px;
     color: #fff;
     border-radius: 8px;
     display: flex;
@@ -223,11 +248,17 @@ main::before {
     background-repeat: no-repeat;
     background-position: center;
     background-blend-mode: multiply;
+    min-width: 80px;
+    /* Ensures a consistent minimum width */
+    height: 40px;
+    /* Ensures a consistent height */
+    justify-content: center;
+    /* Centers the score text */
 }
 
 /* Score Text */
 .score-box span {
-    font-size: 1.2em;
+    font-size: 1em;
     font-weight: bold;
     text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
 }
@@ -259,5 +290,11 @@ img:not([src]) {
 
     main::before {
         left: 20px;
+    }
+
+    /* Adjust score box sizes for smaller screens */
+    .score-box {
+        min-width: 60px;
+        height: 35px;
     }
 }
