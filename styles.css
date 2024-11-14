@@ -1,0 +1,180 @@
+/* General Styles */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    background-color: #000;
+    color: #fff;
+}
+
+header {
+    text-align: center;
+    padding: 50px 0;
+    background-color: #1a1a1a;
+}
+
+h1 {
+    font-size: 3em;
+    margin: 0;
+}
+
+p {
+    font-size: 1.2em;
+}
+
+main {
+    position: relative;
+    max-width: 1200px;
+    margin: auto;
+    padding: 20px 0;
+}
+
+/* The vertical timeline line */
+main::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background-color: #fff;
+    transform: translateX(-50%);
+}
+
+/* Timeline Item Styles */
+.timeline-item {
+    width: 50%;
+    position: relative;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.timeline-item.left {
+    left: 0;
+}
+
+.timeline-item.right {
+    left: 50%;
+}
+
+/* Timeline content */
+.timeline-item .timeline-content {
+    background-color: #1a1a1a;
+    padding: 20px;
+    border-radius: 6px;
+    position: relative;
+}
+
+.timeline-item.left .timeline-content {
+    margin-left: auto;
+    text-align: right;
+}
+
+.timeline-item.right .timeline-content {
+    margin-right: auto;
+    text-align: left;
+}
+
+/* Status Icon Styles */
+.status-icon {
+    position: absolute;
+    top: 20px;
+    width: 40px;
+    height: 40px;
+    background-color: #1a1a1a;
+    border: 4px solid #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1;
+}
+
+.timeline-item.left .status-icon {
+    right: -20px;
+}
+
+.timeline-item.right .status-icon {
+    left: -20px;
+}
+
+/* Status Icon Font Awesome Styles */
+.status-icon i {
+    color: #fff;
+    font-size: 20px;
+}
+
+.timeline-content img {
+    width: 100%;
+    height: auto;
+    margin-bottom: 15px;
+}
+
+/* Scores Container */
+.scores-container {
+    display: flex;
+    flex-wrap: wrap;
+    margin-top: 15px;
+    justify-content: center;
+}
+
+.timeline-item.left .scores-container {
+    justify-content: flex-end;
+}
+
+.timeline-item.right .scores-container {
+    justify-content: flex-start;
+}
+
+/* General Score Box Styles */
+.score-box {
+    position: relative;
+    width: 150px;
+    height: 80px;
+    margin: 10px;
+    padding: 10px;
+    color: #fff;
+    background-color: rgba(26, 26, 26, 0.8);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+}
+
+.score-box .score-icon {
+    max-width: 40px;
+    max-height: 40px;
+    margin-right: 10px;
+    object-fit: cover;
+}
+
+.score-box span {
+    font-size: 1.5em;
+    font-weight: bold;
+}
+
+/* Fallback for missing images */
+img:not([src]) {
+    display: none;
+}
+
+/* Responsive Design */
+@media screen and (max-width: 768px) {
+    .timeline-item {
+        width: 100%;
+        left: 0;
+        padding-left: 70px;
+        padding-right: 25px;
+    }
+
+    .timeline-item.right .timeline-content,
+    .timeline-item.left .timeline-content {
+        margin: 0 auto;
+        text-align: left;
+    }
+
+    .status-icon {
+        left: 20px;
+        right: auto;
+    }
+}
