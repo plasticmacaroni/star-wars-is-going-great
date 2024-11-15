@@ -16,7 +16,7 @@ body {
 /* Header Section */
 header {
     text-align: center;
-    padding: 50px 0;
+    padding: 50px 20px;
     background-color: rgba(26, 26, 26, 0.9);
 }
 
@@ -34,7 +34,7 @@ main {
     position: relative;
     max-width: 1200px;
     margin: auto;
-    padding: 20px 0;
+    padding: 40px 20px;
 }
 
 /* The vertical timeline line */
@@ -53,7 +53,7 @@ main::before {
 .timeline-item {
     width: 50%;
     position: relative;
-    padding: 20px;
+    padding: 20px 40px;
     box-sizing: border-box;
     transition: background-color 0.3s ease;
 }
@@ -92,6 +92,7 @@ main::before {
     /* Adjust as needed */
 }
 
+/* Overlay Gradient */
 .timeline-item .timeline-content::before {
     content: '';
     position: absolute;
@@ -99,12 +100,12 @@ main::before {
     right: 0;
     bottom: 0;
     left: 0;
-    /* Adjust the gradient as needed */
+    /* Gradient overlay */
     background: linear-gradient(to bottom, rgba(26, 26, 26, 0.6), rgba(26, 26, 26, 0.9));
     z-index: 1;
 }
 
-/* Add black haze around text elements */
+/* Text and Score Containers */
 .timeline-item .timeline-content h2,
 .timeline-item .timeline-content p,
 .timeline-item .timeline-content .scores-container,
@@ -140,6 +141,7 @@ main::before {
     margin-bottom: 0;
 }
 
+/* Alignment for Content */
 .timeline-item.left .timeline-content {
     margin-left: auto;
     text-align: right;
@@ -243,6 +245,7 @@ main::before {
     border-radius: 8px;
     display: flex;
     align-items: center;
+    justify-content: center;
     text-decoration: none;
     background-size: contain;
     background-repeat: no-repeat;
@@ -252,8 +255,6 @@ main::before {
     /* Ensures a consistent minimum width */
     height: 40px;
     /* Ensures a consistent height */
-    justify-content: center;
-    /* Centers the score text */
 }
 
 /* Score Text */
@@ -270,31 +271,74 @@ img:not([src]) {
 
 /* Responsive Design */
 @media screen and (max-width: 768px) {
+
+    /* Make all timeline items 100% width */
     .timeline-item {
         width: 100%;
         left: 0;
         padding-left: 70px;
         padding-right: 25px;
+        margin-bottom: 30px;
     }
 
-    .timeline-item.right .timeline-content,
-    .timeline-item.left .timeline-content {
-        margin: 0 auto;
+    /* Align all content to the left */
+    .timeline-item.left .timeline-content,
+    .timeline-item.right .timeline-content {
+        margin: 0;
         text-align: left;
     }
 
-    .status-icon {
-        left: 20px;
-        right: auto;
-    }
-
+    /* Position the timeline line to the left */
     main::before {
         left: 20px;
+        transform: none;
+    }
+
+    /* Adjust status icon positioning */
+    .status-icon {
+        left: 0px;
+        right: auto;
+        transform: translateX(-50%);
+    }
+
+    .timeline-item.left .status-icon,
+    .timeline-item.right .status-icon {
+        right: auto;
+        left: 0px;
+    }
+
+    /* Hide the right side class for timeline items on mobile */
+    .timeline-item.right {
+        left: 0;
     }
 
     /* Adjust score box sizes for smaller screens */
     .score-box {
         min-width: 60px;
         height: 35px;
+        padding: 8px 12px;
+        font-size: 0.9em;
+    }
+
+    /* Enhance spacing for score labels */
+    .timeline-item .timeline-content .scores-label {
+        font-size: 1.3em;
+        margin-bottom: 10px;
+    }
+
+    /* Reduce padding and margins for content */
+    .timeline-item .timeline-content {
+        padding: 15px;
+        min-height: 250px;
+    }
+
+    /* Optional: Adjust header padding on mobile */
+    header {
+        padding: 30px 10px;
+    }
+
+    /* Optional: Adjust main padding on mobile */
+    main {
+        padding: 20px 10px;
     }
 }
